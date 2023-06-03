@@ -42,7 +42,6 @@ export const getBasket = createAsyncThunk(
 export const addPutItem = createAsyncThunk(
   'meals/putAddItem',
   async (payload: BasketType, { dispatch, rejectWithValue }) => {
-    console.log('payload: ', payload)
 
     try {
       const response = await putAmountToAddBasket(payload)

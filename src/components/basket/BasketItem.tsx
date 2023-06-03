@@ -1,14 +1,20 @@
 import { FC } from 'react'
-import { BasketItemsType } from './Basket'
 import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import { styled } from '@mui/material'
+import { BasketType } from '../../store/basket/basketThunk'
 
 interface PropsBasketItems {
-  item: BasketItemsType
+  item: BasketType
+  incrementFoodHandler: (item: BasketType) => void
+  decrementFoodHandler: (item: BasketType) => void
 }
 
-export const BasketItem: FC<PropsBasketItems> = ({ item }) => {
+export const BasketItem: FC<PropsBasketItems> = ({
+  item,
+  incrementFoodHandler,
+  decrementFoodHandler,
+}) => {
   return (
     <Container>
       <Title>{item.title}</Title>
@@ -18,13 +24,11 @@ export const BasketItem: FC<PropsBasketItems> = ({ item }) => {
           <Amount>x{item.amount}</Amount>
         </PriceAndAmountContainer>
         <CounterContainer>
-          {/* onClick={decrementFoodHandler} */}
-          <ContainerStyleMinusBasket>
+          <ContainerStyleMinusBasket onClick={() => decrementFoodHandler(item)}>
             <RemoveIcon />
           </ContainerStyleMinusBasket>
 
-          {/* onClick={incrementFoodHandler} */}
-          <ContainerStylePlusBasket>
+          <ContainerStylePlusBasket onClick={() => incrementFoodHandler(item)}>
             <AddIcon />
           </ContainerStylePlusBasket>
         </CounterContainer>

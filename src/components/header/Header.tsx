@@ -1,17 +1,38 @@
 import { styled } from '@mui/material'
 import { OrderBasket } from './OrderBasket'
-import { FC } from 'react'
+import { FC, useEffect, useState } from 'react'
+import { RootState } from '../../store'
+import { useSelector } from 'react-redux'
 
 interface PropsHeader {
   toggleHandler: () => void
 }
 
 export const Header: FC<PropsHeader> = ({ toggleHandler }) => {
+  const [animationClass, setAnimationClass] = useState('')
+  const { items } = useSelector((state: RootState) => state.basket)
+
+  const plusAnimation = () => {
+    setAnimationClass('bump')
+
+    const animationTimePlus = setTimeout(() => {
+      setAnimationClass('')
+    }, 300)
+
+    return () => {
+      clearTimeout(animationTimePlus)
+    }
+  }
+
+  useEffect(() => {
+    plusAnimation()
+  }, [items])
+
   return (
     <HeaderStyle>
       <Container>
         <Logo>React Meals</Logo>
-        <OrderBasket className={''} toggleHandler={toggleHandler}>
+        <OrderBasket className={animationClass} toggleHandler={toggleHandler}>
           Your Cart
         </OrderBasket>
       </Container>

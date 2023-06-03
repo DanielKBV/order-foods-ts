@@ -2,23 +2,30 @@ import { ChangeEvent, FC, useState } from 'react'
 import { styled } from '@mui/material'
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
 import { Button } from '../UI/button/Button'
+import { MouseEvent } from 'react'
 
 interface PropsMealsItemForm {
+  addItemHandler: (amount: number, id: string) => void
   id: string
-  price: number
 }
 
-export const MealsItemForm: FC<PropsMealsItemForm> = ({ id, price }) => {
+export const MealsItemForm: FC<PropsMealsItemForm> = ({
+  addItemHandler,
+  id,
+}) => {
   const [amount, setAmount] = useState(1)
 
   const changeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setAmount(+e.target.value)
   }
 
-  // const addItemHandler = (event) => {
-  //   event.preventDefault()
-  //   onAdd(+amount)
-  // }
+  const addBasketHandler = (
+    event: MouseEvent<HTMLButtonElement, globalThis.MouseEvent>
+  ) => {
+    event.preventDefault()
+
+    addItemHandler(+amount, id)
+  }
 
   return (
     <StyledForm>
@@ -29,12 +36,11 @@ export const MealsItemForm: FC<PropsMealsItemForm> = ({ id, price }) => {
             type="number"
             value={amount}
             onChange={changeHandler}
-            id={id}
             min={1}
           />
         </LabelStyles>
       </InputContainer>
-      <Button variants="contained" onClick={() => {}}>
+      <Button variants="contained" onClick={addBasketHandler}>
         <StyledIcon /> Add
       </Button>
     </StyledForm>

@@ -3,45 +3,90 @@ import { styled } from '@mui/material'
 import { FC } from 'react'
 import { TotalAmount } from './TotalAmount'
 import { BasketItem } from './BasketItem'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '../../store'
+import {
+  BasketType,
+  deleteAmountFood,
+  putDecrementAmountFood,
+  putIncrementAmountFood,
+} from '../../store/basket/basketThunk'
+import { ActionsTypeSnackbar } from '../../store/snackbar/snackbarSlice'
+import { Loading } from '../UI/loading/Loading'
 
 interface PropsBasket {
   onClose: () => void
   open: boolean
 }
 
-export interface BasketItemsType {
-  amount: number
-  price: number
-  title: string
-  id: string
-}
-
-const items: BasketItemsType[] = [
-  {
-    id: '64747e13a67b1ca4c0182212',
-    title: 'Испанские пинчос из Сан-Себастьяна',
-    price: 199,
-    amount: 76,
-  },
-]
-
 export const Basket: FC<PropsBasket> = ({ onClose, open }) => {
-  console.log('Hello')
+  const { items, isLoading } = useSelector((state: RootState) => state.basket)
+  const dispatch = useDispatch<AppDispatch>()
+
+  const totalPrice = items?.reduce(
+    (prev, current) => prev + (current.price ?? 0) * (current.amount ?? 0),
+    0
+  )
+
+  const incrementFoodHandler = async (data: BasketType) => {
+    try {
+      const newData = { ...data, amount: data.amount + 1 }
+      await dispatch(putIncrementAmountFood(newData)).unwrap()
+
+      dispatch(ActionsTypeSnackbar.doSuccess())
+    } catch (error) {
+      if (error instanceof Error && error.message) {
+        dispatch(ActionsTypeSnackbar.doError(error.message))
+      } else {
+        dispatch(ActionsTypeSnackbar.doError('Something went wrong'))
+      }
+    }
+  }
+
+  const decrementFoodHandler = async (data: BasketType) => {
+    try {
+      const newData = { ...data, amount: data.amount - 1 }
+      if (data.amount !== 1) {
+        await dispatch(putDecrementAmountFood(newData)).unwrap()
+      } else {
+        await dispatch(deleteAmountFood(data)).unwrap()
+      }
+
+      dispatch(ActionsTypeSnackbar.doSuccess())
+    } catch (error) {
+      if (error instanceof Error && error.message) {
+        dispatch(ActionsTypeSnackbar.doError(error.message))
+      } else {
+        dispatch(ActionsTypeSnackbar.doError('Something went wrong'))
+      }
+    }
+  }
+
   return (
-    <Modal onClose={onClose} open={open}>
-      <StyledModalContent>
-        <Content>
-          {items?.length ? (
-            <FixedWidthContainer>
-              {items.map((item) => {
-                return <BasketItem key={item.id} item={item} />
-              })}
-            </FixedWidthContainer>
-          ) : null}
-          <TotalAmount toggleHandler={onClose} totalPrice={60} />
-        </Content>
-      </StyledModalContent>
-    </Modal>
+    <>
+      {isLoading && <Loading />}
+      <Modal onClose={onClose} open={open}>
+        <StyledModalContent>
+          <Content>
+            {items?.length ? (
+              <FixedWidthContainer>
+                {items.map((item) => {
+                  return (
+                    <BasketItem
+                      key={item.id}
+                      item={item}
+                      incrementFoodHandler={incrementFoodHandler}
+                      decrementFoodHandler={decrementFoodHandler}
+                    />
+                  )
+                })}
+              </FixedWidthContainer>
+            ) : null}
+            <TotalAmount toggleHandler={onClose} totalPrice={totalPrice} />
+          </Content>
+        </StyledModalContent>
+      </Modal>
+    </>
   )
 }
 
